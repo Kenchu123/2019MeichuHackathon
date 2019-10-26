@@ -8,6 +8,8 @@ class PDFViewer extends React.Component {
         this.pageRef = React.createRef()
         this.state = {
             pageNum: 1,
+            width: 0,
+            height: 0,
         }
         this.setPage = this.setPage.bind(this)
         this.renderPDF = this.renderPDF.bind(this)
@@ -18,7 +20,7 @@ class PDFViewer extends React.Component {
         let { pageNum } = this.state
         console.log(pdf)
         if (pageNum + n >= 1 && pageNum + n <= pdf.numPages) {
-            this.setState({pageNum: pageNum + n})
+            this.setState({pageNum: pageNum + n}, this.renderPDF)
         }
     }
 
@@ -39,12 +41,18 @@ class PDFViewer extends React.Component {
                 canvasContext: context,
                 viewport: viewport,
             }
+            this.setState({
+                height: viewport.height,
+                width: viewport.width
+            })
             page.render(renderContext)
         })
     }
+    componentDidMount() {
+        this.renderPDF()
+    }
 
     render() {
-        this.renderPDF()
         return (
             <div id='viewer'>
                 <button onClick={() => this.setPage(-1)}>Prev</button>
@@ -54,11 +62,8 @@ class PDFViewer extends React.Component {
                 <br />
                 <div id='viewer' className='container'>
                     <div id={`page-${this.state.pageNum}`} style={{position: 'relatvie'}}>
-                        <canvas ref={this.pageRef}
-                            onMouseDown={(e) => this.rect.mouseDown(e, this.pageRef.current)}
-                            onMouseUp={(e) => this.rect.mouseUp(e, this.pageRef.current)}
-                            onMouseMove={(e) => this.rect.mouseMove(e, this.pageRef.current)}
-                        />
+                        <canvas ref={this.pageRef} />
+                        <MouseDraw width={this.state.width} height={this.state.height} />
                     </div>
                 </div>
             </div>
