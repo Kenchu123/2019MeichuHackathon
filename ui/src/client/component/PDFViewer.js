@@ -1,11 +1,11 @@
 // for rendering pdf
 import React from 'react'
-import pdfjsLib from 'pdfjs-dist'
 
 class PDFViewer extends React.Component {
     constructor(props) {
         super(props)
-        this.pageRef = React.createRef();
+        this.pageRef = React.createRef()
+        this.textRef = React.createRef()
         this.state = {
             pageNum: 1
         }
@@ -25,24 +25,21 @@ class PDFViewer extends React.Component {
         let { pdf } = this.props
         let { pageNum } = this.state
         pdf.getPage(pageNum).then(page => {
-            let scale = 1
+            let scale = 1.5
             let viewport = page.getViewport({scale: scale})
             let canvas = this.pageRef.current
             canvas.height = viewport.height
             canvas.width = viewport.width
-            var context = canvas.getContext('2d')
+            let context = canvas.getContext('2d')
+            // context.clearRect(0, 0, canvas.width, canvas.height);
+
 
             // Render PDF page into canvas context
             let renderContext = {
                 canvasContext: context,
-                viewport: viewport
+                viewport: viewport,
             }
-
-            let renderTask = page.render(renderContext);
-            renderTask.promise.then(function () {
-                console.log('Page rendered');
-            })
-
+            page.render(renderContext)
         })
     }
 
@@ -53,7 +50,13 @@ class PDFViewer extends React.Component {
                 <button onClick={() => this.setPage(-1)}>Prev</button>
                 <button onClick={() => this.setPage(1)}>Next</button>
                 <br />
-                <canvas ref={this.pageRef} />
+                <br />
+                <br />
+                <div id='viewer' className='container'>
+                    <div id={`page-${this.state.pageNum}`} style={{position: 'relatvie'}}>
+                        <canvas ref={this.pageRef} />
+                    </div>
+                </div>
             </div>
         )
     }
