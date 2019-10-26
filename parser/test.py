@@ -133,12 +133,43 @@ def merge_overlapped(textboxes):
                 j._objs.pop(0)  # remove unused '\n' (or ' ') in j
 
 
+def split_pin_and_number(textboxes):
+    pins = []
+    numbers = []
+    for textbox in textboxes:
+        text = textbox.text
+        if text.isdigit():
+            numbers.append(textbox)
+        else:
+            pins.append(textbox)
+    return pins, numbers
+
+# def split_pin_and_number(textboxes):
+#     pins = []
+#     numbers = []
+#     for textbox in textboxes:
+#         for textline in textbox:
+
+#             text = textline.get_text().strip()
+#             if text.isdigit():
+#                 numbers.append(textline)
+#             else:
+#                 pins.append(textline)
+#     return pins, numbers
+
+
 if __name__ == '__main__':
     # textboxes = get_text('../data/42-45S83200G-16160G.pdf', 2, (0, 274, 612, 650))
     textboxes = get_text('../data/TLK2711.pdf', 2, (0, 90, 612, 422))
     # textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
 
-    # pprint(split_objs(textboxes))
     merge_overlapped(textboxes)
 
+    textboxes = split_objs(textboxes)
+
     pprint(textboxes)
+    pins, numbers = split_pin_and_number(textboxes)
+    print("Pins:", end='\n\n\n')
+    pprint(pins)
+    print("Numbers:", end='\n\n\n')
+    pprint(numbers)
