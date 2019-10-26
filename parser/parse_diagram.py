@@ -75,7 +75,7 @@ def split_objs(textboxes):
         arr = text.split()  # split by whitespace
         width = x1 - x0
         height = y1 - y0
-
+        # TODO
         if isinstance(textbox, LTTextBoxHorizontal):
             if sep == '\n':
                 approx_h = height / len(arr)
