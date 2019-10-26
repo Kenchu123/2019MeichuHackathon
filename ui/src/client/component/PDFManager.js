@@ -1,7 +1,6 @@
 // for rendering pdf
 import React from 'react';
 import pdfjsLib from 'pdfjs-dist';
-import PDFViewer from './PDFViewer';
 import Button from '@material-ui/core/Button';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Typography from '@material-ui/core/Typography';
@@ -40,7 +39,9 @@ class PDFManager extends React.Component {
         .getDocument(typedarray)
         .promise.then(pdf => {
           // upload finish
-          this.setState({ uploadStatus: UPLOAD_STATUS.FINISHED, pdf });
+          this.props.updatePdf(pdf);
+          this.props.nextPage();
+          // this.setState({ uploadStatus: UPLOAD_STATUS.FINISHED, pdf });
         })
         .catch(err => {
           this.setState({ uploadStatus: UPLOAD_STATUS.FAILED });
@@ -62,17 +63,12 @@ class PDFManager extends React.Component {
 
   render() {
     let pdfViewer;
-    if (this.state.uploadStatus === UPLOAD_STATUS.FINISHED) {
-      pdfViewer = <PDFViewer pdf={this.state.pdf} />;
-    }
-
     return (
       <div>
-        <Typography variant="h2">Upload File</Typography>
-        <Typography
-          variant="h5"
-          style={{ paddingTop: '24px', paddingBottom: '12px' }}
-        >
+        <Typography gutterBottom variant="h2">
+          Upload File
+        </Typography>
+        <Typography paragraph variant="h5">
           Upload datasheet and select the desired area to parse
         </Typography>
         <Button
@@ -102,7 +98,6 @@ class PDFManager extends React.Component {
             'Upload'
           )}
         </Button>
-        {pdfViewer}
       </div>
     );
   }

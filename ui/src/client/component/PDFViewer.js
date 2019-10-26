@@ -4,6 +4,10 @@ import MouseDraw from './MouseDraw';
 import IconButton from '@material-ui/core/IconButton';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Typography from '@material-ui/core/Typography';
 
 class PDFViewer extends React.Component {
   constructor(props) {
@@ -58,7 +62,13 @@ class PDFViewer extends React.Component {
 
   render() {
     return (
-      <div id="viewer" style={{ paddingTop: '24px' }}>
+      <div id="viewer">
+        <Typography gutterBottom variant="h2">
+          Select Area
+        </Typography>
+        <Typography paragraph variant="h5">
+          Click and drag to select a desired area
+        </Typography>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <IconButton onClick={() => this.setPage(-1)}>
             <ChevronLeftIcon />
