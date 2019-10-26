@@ -194,10 +194,9 @@ def sweep_2d_array(data, x_count, y_count, min_x, max_y, delta_x, delta_y):
 
 if __name__ == '__main__':
     # textboxes = get_text('../data/TLK2711.pdf', 2, (0, 460, 612, 693))
-    textboxes = get_text('../data/42-45S83200G-16160G.pdf',
-                         4, (0, 300, 612, 660))
-    # textboxes = get_text(
-    #     '../data/66-67WVE2M16EALL-BLL-CLL.pdf', 2, (0, 383, 612, 664))
+    # textboxes = get_text('../data/42-45S83200G-16160G.pdf', 4, (0, 300, 612, 660))
+    textboxes = get_text(
+        '../data/66-67WVE2M16EALL-BLL-CLL.pdf', 2, (0, 383, 612, 664))
 
     bound = get_table_bound(textboxes)
     x0, y0, x1, y1 = bound
@@ -205,11 +204,10 @@ if __name__ == '__main__':
     table_h = y1 - y0
 
     result = split_objs(textboxes, table_w, table_h)
-
     # TODO use set to record header to avoid duplicate
     header_x, header_y, data = extract_header(result, bound)
     header_x.sort(key=TextObject.x)
-    header_y.sort(key=TextObject.y)
+    header_y.sort(key=TextObject.y, reverse=True)
 
     data_bound = get_table_bound(data)
 
@@ -221,9 +219,16 @@ if __name__ == '__main__':
     h_delta = data_h / y_count
     w_data = data_w / x_count
 
-    result = sweep_2d_array(data, x_count, y_count,
+    arr_2d = sweep_2d_array(data, x_count, y_count,
                             d_x0, d_y1, w_data, h_delta)
 
+    result = {}
+    for row_ind, row in enumerate(arr_2d):
+        for col_ind, i in enumerate(row):
+            if not i:  # empty block
+                continue
+            id = '{}{}'.format(header_y[row_ind].text, header_x[col_ind].text)
+            if i.text not in result:
+                result[i.text] = []
+            result[i.text].append(id)
     pprint(result)
-    pprint(header_x)
-    pprint(header_y)
