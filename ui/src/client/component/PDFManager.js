@@ -50,15 +50,14 @@ class PDFManager extends React.Component {
     fileReader.readAsArrayBuffer(file);
 
     // pass to server
-    let formData = new FormData()
-    formData.append('pdf', file)
+    let formData = new FormData();
+    formData.append('pdf', file);
     fetch('/api/download', {
-        method: 'POST',
-        body: formData,
-    })
-    .then(res => {
-        console.log(res.json)
-    })
+      method: 'POST',
+      body: formData
+    }).then(res => {
+      console.log(res.json);
+    });
   }
 
   render() {
