@@ -99,7 +99,7 @@ def split_objs(textboxes):
             if sep != '\n':
                 approx_h = height / len(arr)
                 # evenly divide in vertical direction
-                pprint(arr)
+                # pprint(arr)
                 for index, txt in enumerate(arr):
                     ret.append(TextObject(
                         txt, (x0, y1 - (index+1)*approx_h, x1, y1 - index*approx_h), is_vertical=True))
@@ -110,6 +110,7 @@ def split_objs(textboxes):
                 for index, txt in enumerate(arr):
                     ret.append(TextObject(
                         txt, (x0+index*approx_w, y0, x0+(index+1)*approx_w, y1), is_vertical=False))
+    
     return ret
 
 
@@ -252,9 +253,9 @@ def tmp_parse(textboxes):
 
 
 if __name__ == '__main__':
-    # textboxes = get_text('../data/42-45S83200G-16160G.pdf', 2, (0, 274, 612, 650))
+    textboxes = get_text('../data/42-45S83200G-16160G.pdf', 2, (0, 274, 612, 650))
     # textboxes = get_text('../data/TLK2711.pdf', 2, (0, 90, 612, 422))
-    textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
+    # textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
 
     # pprint(textboxes)
     merge_overlapped(textboxes)
