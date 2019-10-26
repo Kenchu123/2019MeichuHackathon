@@ -194,15 +194,15 @@ def sweep_2d_array(data, x_count, y_count, min_x, max_y, delta_x, delta_y):
 
 if __name__ == '__main__':
     # textboxes = get_text('../data/TLK2711.pdf', 2, (0, 460, 612, 693))
-    # textboxes = get_text('../data/42-45S83200G-16160G.pdf', 4, (0, 300, 612, 660))
-    textboxes = get_text(
-        '../data/66-67WVE2M16EALL-BLL-CLL.pdf', 2, (0, 383, 612, 664))
+    textboxes = get_text('../data/42-45S83200G-16160G.pdf', 5, (0, 300, 612, 660))
+    # textboxes = get_text('../data/66-67WVE2M16EALL-BLL-CLL.pdf', 2, (0, 383, 612, 664))
 
     bound = get_table_bound(textboxes)
     x0, y0, x1, y1 = bound
     table_w = x1 - x0
     table_h = y1 - y0
 
+    pprint(textboxes)
     result = split_objs(textboxes, table_w, table_h)
     # TODO use set to record header to avoid duplicate
     header_x, header_y, data = extract_header(result, bound)
