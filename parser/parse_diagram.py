@@ -41,10 +41,11 @@ def get_text(filename, page_number, range=(0, 0, 612, 792), detect_vertical=True
 
 
 class TextObject:
-    def __init__(self, text, bbox, is_vertical):
+    def __init__(self, text, bbox, is_vertical, size = 1):
         self.text = text
         self.bbox = bbox
         self.is_vertical = is_vertical
+        self.size = size
 
     def __repr__(self):
         center_x = (self.bbox[0] + self.bbox[2]) / 2
@@ -80,28 +81,35 @@ def split_objs(textboxes):
             if sep == '\n':
                 approx_h = height / len(arr)
                 # evenly divide in vertical direction
+                # pprint(arr)
                 for index, txt in enumerate(arr):
                     ret.append(TextObject(
                         txt, (x0, y1 - (index+1)*approx_h, x1, y1 - index*approx_h), is_vertical=False))
             else:
                 approx_w = width / len(arr)
+                # pprint(arr)            
                 # evenly divide in horizontal direction
+                # for index, txt in enumerate(arr):
+                #     ret.append(TextObject(
+                #         txt, (x1-(index+1)*approx_w, y0, x1-index*approx_w, y1), is_vertical=False))
                 for index, txt in enumerate(arr):
                     ret.append(TextObject(
-                        txt, (x1-(index+1)*approx_w, y0, x1-index*approx_w, y1), is_vertical=False))
+                        txt, (x0+index*approx_w, y0, x0+(index+1)*approx_w, y1), is_vertical=False))
         else:  # Vertical text
             if sep != '\n':
                 approx_h = height / len(arr)
                 # evenly divide in vertical direction
+                pprint(arr)
                 for index, txt in enumerate(arr):
                     ret.append(TextObject(
                         txt, (x0, y1 - (index+1)*approx_h, x1, y1 - index*approx_h), is_vertical=True))
             else:
                 approx_w = width / len(arr)
                 # evenly divide in horizontal direction
+                # pprint(arr)
                 for index, txt in enumerate(arr):
                     ret.append(TextObject(
-                        txt, (x1-(index+1)*approx_w, y0, x1-index*approx_w, y1), is_vertical=True))
+                        txt, (x0+index*approx_w, y0, x0+(index+1)*approx_w, y1), is_vertical=False))
     return ret
 
 
@@ -230,16 +238,34 @@ def plot_object(lst):
     plt.scatter(xs, ys)
     plt.show()
 
+def tmp_parse(textboxes):
+    for textbox in textboxes:
+        if textbox.text.isdigit() and len(textbox._objs) > 1:
+            index = textboxes.index(textbox.text)
+            x0, y0, x1, y1 = textbox.bbox
+            delta = (y1 - y0) / len(textbox._objs)
+            for i in range(len(textbox._objs)):
+                textboxes.append(textbox._objs[0], textbox._objs.bbox, textbox._objs.is_vertical)
+            textboxes.pop(index)
+            
+    return textboxes
+
 
 if __name__ == '__main__':
     # textboxes = get_text('../data/42-45S83200G-16160G.pdf', 2, (0, 274, 612, 650))
     # textboxes = get_text('../data/TLK2711.pdf', 2, (0, 90, 612, 422))
     textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
 
+    # pprint(textboxes)
     merge_overlapped(textboxes)
+    # pprint(textboxes)
     textboxes = split_objs(textboxes)
+    # tmp_result = tmp_parse(textboxes)
     pins, numbers = split_pin_and_number(textboxes)
+    # pins, numbers = split_pin_and_number(tmp_result)
     result = match_pin_and_number(pins, numbers)
     merge_pins_mapped_to_same_number(result)
-
-    pprint(result)
+    
+    # pprint(textboxes)
+    # pprint(result)
+    plot_object(textboxes)
