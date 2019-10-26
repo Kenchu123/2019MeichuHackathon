@@ -1,5 +1,7 @@
 from pprint import pprint
+import math
 
+import matplotlib.pyplot as plt
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfpage import PDFPage
@@ -49,6 +51,18 @@ class TextObject:
         center_y = (self.bbox[1] + self.bbox[3]) / 2
         return 'TextObject({}, ({:.2f}, {:.2f}) -> ({:.2f}, {:.2f}), {})'.format(self.text, *self.bbox, 'v' if self.is_vertical else 'h')
         # return 'TextObject({}, ({:.2f}, {:.2f}), {})'.format(self.text, center_x, center_y, 'v' if self.is_vertical else 'h')
+
+    def approx_fontsize(self):
+        x0, y0, x1, y1 = self.bbox
+        w = x1 - x0
+        h = y1 - y0
+        return w*h / len(self.text)
+
+    def x(self):
+        return (self.bbox[0] + self.bbox[2]) / 2
+
+    def y(self):
+        return (self.bbox[1] + self.bbox[3]) / 2
 
 
 def split_objs(textboxes):
@@ -103,14 +117,14 @@ def aligned(a, b):
     return a_left == b_left or a_bottom == b_bottom or a_right == b_right or a_top == b_top
 
 
-# def distance(a, b):
-#     a_left, a_bottom, a_right, a_top = a
-#     b_left, b_bottom, b_right, b_top = b
-#     a_mid_x = (a_left + a_right) / 2
-#     a_mid_y = (a_top + a_bottom) / 2
-#     b_mid_x = (b_left + b_right) / 2
-#     b_mid_y = (b_top + b_bottom) / 2
-#     return math.hypot(a_mid_x - b_mid_x, a_mid_y - b_mid_y)
+def distance(a, b):
+    a_left, a_bottom, a_right, a_top = a
+    b_left, b_bottom, b_right, b_top = b
+    a_mid_x = (a_left + a_right) / 2
+    a_mid_y = (a_top + a_bottom) / 2
+    b_mid_x = (b_left + b_right) / 2
+    b_mid_y = (b_top + b_bottom) / 2
+    return math.hypot(a_mid_x - b_mid_x, a_mid_y - b_mid_y)
 
 
 def merge_overlapped(textboxes):
@@ -141,18 +155,23 @@ def split_pin_and_number(textboxes):
     return pins, numbers
 
 
-# def match_pin_and_number(pins, numbers):
-#     ret = {num.text: [] for num in numbers}
-#     for pin in pins:
-#         nearest = None
-#         shortest_dist = float('inf')
-#         for number in numbers:
-#             dist = distance(pin.bbox, number.bbox)
-#             if dist < shortest_dist:
-#                 shortest_dist = dist
-#                 nearest = number.text
-#         ret[nearest].append(pin)
-#     return ret
+def match_pin_and_number(pins, numbers):
+    l, b, t, r = find_pos_maxima(numbers)
+    x_limit = (r - l) / 2
+    y_limit = (t - b) / 2
+
+    ret = {num.text: [] for num in numbers}
+    for pin in pins:
+        nearest = None
+        shortest_dist = float('inf')
+        for number in numbers:
+            dist = distance(pin.bbox, number.bbox)
+            if dist < shortest_dist:
+                shortest_dist = dist
+                nearest = number.text
+        ret[nearest].append(pin)
+    return ret
+
 
 def find_pos_maxima(numbers):
     leftmost = 0
@@ -168,61 +187,60 @@ def find_pos_maxima(numbers):
     return leftmost, bottom, top, rightmost
 
 
-def match_pin_and_number(pins, numbers):
-    l, b, t, r = find_pos_maxima(numbers)
-    x_limit = (r - l) / 2
-    y_limit = (t - b) / 2
-
-    ret = {num.text: [] for num in numbers}
-    for pin in pins:
-        nearest = None
-        shortest_dist = float('inf')
-        for number in numbers:
-            p_x0, p_y0, p_x1, p_y1 = pin.bbox
-            n_x0, n_y0, n_x1, n_y1 = number.bbox
-            if pin.is_vertical:
-                if abs((p_y0+p_y1)/2 - (n_y0+n_y1)/2) > y_limit:
-                    continue
-                dist = abs((p_x0+p_x1)/2 - (n_x0+n_x1)/2)
-            else:
-                if abs((p_x0+p_x1)/2 - (n_x0+n_x1)/2) > x_limit:
-                    continue
-                dist = abs((p_y0+p_y1)/2 - (n_y0+n_y1)/2)
-            if dist < shortest_dist:
-                shortest_dist = dist
-                nearest = number.text
-        ret[nearest].append(pin)
-    return ret
-
-
 def midpoint(box):
     x0, y0, x1, y1 = box
     return ((x0+x1)/2, (y0+y1)/2)
 
 
+def merge_pins_mapped_to_same_number(map):
+    for num, group in map.items():
+        if len(group) == 1:
+            map[num] = group[0]
+            continue
+        # ref_fontsize = group[0].approx_fontsize() # assume first character is not subscript/superscript
+        # TODO deal with superscript and subscript
+        merged = TextObject('', (float('inf'), float('inf'), 0, 0), True)
+        # calculate merged dimension
+        for text_obj in group:
+            m_x0, m_y0, m_x1, m_y1 = merged.bbox
+            x0, y0, x1, y1 = text_obj.bbox
+            merged.bbox = (min(m_x0, x0), min(m_y0, y0),
+                           max(m_x1, x1), max(m_y1, y1))
+        x0, y0, x1, y1 = text_obj.bbox
+        w = x1 - x0
+        h = y1 - y0
+        if w < h:
+            # is vertical
+            group.sort(key=TextObject.y)  # sort by y
+        else:
+            # is horizontal
+            merged.is_vertical = False
+            group.sort(key=TextObject.x)  # sort by x
+        merged.text = ''.join(i.text for i in group)
+        map[num] = merged
+
+
+def plot_object(lst):
+    xs = []
+    ys = []
+    for i in lst:
+        x, y = midpoint(i.bbox)
+        xs.append(x)
+        ys.append(y)
+    plt.scatter(xs, ys)
+    plt.show()
+
+
 if __name__ == '__main__':
-    # textboxes = get_text('../data/42-45S83200G-16160G.pdf', 2, (0, 274, 612, 650))
-    textboxes = get_text('../data/TLK2711.pdf', 2, (0, 90, 612, 422))
-    # textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
+    # textboxes = get_text('../data/42-45S83200G-16160G.pdf',2, (0, 274, 612, 650))
+    # textboxes = get_text('../data/TLK2711.pdf', 2, (0, 90, 612, 422))
+    textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
 
     merge_overlapped(textboxes)
     textboxes = split_objs(textboxes)
     pins, numbers = split_pin_and_number(textboxes)
     result = match_pin_and_number(pins, numbers)
+    merge_pins_mapped_to_same_number(result)
 
     pprint(result)
-
-    # xs = []  # TODO for debug
-    # ys = []
-    # for i in pins:
-    #     x, y = midpoint(i.bbox)
-    #     xs.append(x)
-    #     ys.append(y)
-    # for j in numbers:
-    #     x, y = midpoint(j.bbox)
-    #     xs.append(x)
-    #     ys.append(y)
-
-    # import matplotlib.pyplot as plt
-    # plt.scatter(xs, ys)
-    # plt.show()
+    plot_object(result.values())
