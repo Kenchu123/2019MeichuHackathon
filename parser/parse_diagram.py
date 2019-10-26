@@ -1,5 +1,6 @@
 from pprint import pprint
 import math
+import json
 
 import matplotlib.pyplot as plt
 from pdfminer.pdfparser import PDFParser
@@ -41,7 +42,7 @@ def get_text(filename, page_number, range=(0, 0, 612, 792), detect_vertical=True
 
 
 class TextObject:
-    def __init__(self, text, bbox, is_vertical, size = 1):
+    def __init__(self, text, bbox, is_vertical, size=1):
         self.text = text
         self.bbox = bbox
         self.is_vertical = is_vertical
@@ -65,6 +66,9 @@ class TextObject:
     def y(self):
         return (self.bbox[1] + self.bbox[3]) / 2
 
+    def to_json(self):
+        return {"text": self.text, "bbox": self.bbox}
+
 
 def split_objs(textboxes):
     ret = []
@@ -87,7 +91,7 @@ def split_objs(textboxes):
                         txt, (x0, y1 - (index+1)*approx_h, x1, y1 - index*approx_h), is_vertical=False))
             else:
                 approx_w = width / len(arr)
-                # pprint(arr)            
+                # pprint(arr)
                 # evenly divide in horizontal direction
                 # for index, txt in enumerate(arr):
                 #     ret.append(TextObject(
@@ -110,7 +114,7 @@ def split_objs(textboxes):
                 for index, txt in enumerate(arr):
                     ret.append(TextObject(
                         txt, (x0+index*approx_w, y0, x0+(index+1)*approx_w, y1), is_vertical=False))
-    
+
     return ret
 
 
@@ -239,6 +243,7 @@ def plot_object(lst):
     plt.scatter(xs, ys)
     plt.show()
 
+
 def tmp_parse(textboxes):
     for textbox in textboxes:
         if textbox.text.isdigit() and len(textbox._objs) > 1:
@@ -246,27 +251,28 @@ def tmp_parse(textboxes):
             x0, y0, x1, y1 = textbox.bbox
             delta = (y1 - y0) / len(textbox._objs)
             for i in range(len(textbox._objs)):
-                textboxes.append(textbox._objs[0], textbox._objs.bbox, textbox._objs.is_vertical)
+                textboxes.append(
+                    textbox._objs[0], textbox._objs.bbox, textbox._objs.is_vertical)
             textboxes.pop(index)
-            
+
     return textboxes
 
 
 if __name__ == '__main__':
-    textboxes = get_text('../data/42-45S83200G-16160G.pdf', 2, (0, 274, 612, 650))
+    # textboxes = get_text('../data/42-45S83200G-16160G.pdf', 2, (0, 274, 612, 650))
     # textboxes = get_text('../data/TLK2711.pdf', 2, (0, 90, 612, 422))
-    # textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
+    textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
 
-    # pprint(textboxes)
     merge_overlapped(textboxes)
-    # pprint(textboxes)
     textboxes = split_objs(textboxes)
-    # tmp_result = tmp_parse(textboxes)
     pins, numbers = split_pin_and_number(textboxes)
-    # pins, numbers = split_pin_and_number(tmp_result)
     result = match_pin_and_number(pins, numbers)
     merge_pins_mapped_to_same_number(result)
-    
+
     # pprint(textboxes)
     # pprint(result)
-    plot_object(textboxes)
+    # plot_object(textboxes)
+
+    result_json = {k: v.to_json() for k, v in result.items()}
+    with open("./result.json", 'w') as f:
+        json.dump(result_json, f)

@@ -4,8 +4,10 @@ class MouseDraw extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      last_mouseY: 0,
-      last_mouseX: 0,
+      startX: 0,
+      startY: 0,
+      endX: 0,
+      endY: 0,
       mouseIsDown: false
     };
     this.drawRef = React.createRef();
@@ -25,8 +27,8 @@ class MouseDraw extends React.Component {
     let canvas = this.drawRef.current;
     const canPos = canvas.getBoundingClientRect();
     this.setState({
-      last_mouseX: parseInt(e.clientX - canPos.left),
-      last_mouseY: parseInt(e.clientY - canPos.top),
+      startX: parseInt(e.clientX - canPos.left),
+      startY: parseInt(e.clientY - canPos.top),
       mouseIsDown: true
     });
   }
@@ -38,22 +40,24 @@ class MouseDraw extends React.Component {
   mouseMove(e) {
     let canvas = this.drawRef.current;
     const ctx = canvas.getContext('2d');
-    if (this.state.mouseIsDown) {
+    if (e.buttons === 1) {
+      // left click
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.beginPath();
-      let width =
-        e.clientX -
-        this.state.last_mouseX -
-        canvas.getBoundingClientRect().left;
-      let height =
-        e.clientY - this.state.last_mouseY - canvas.getBoundingClientRect().top;
+      const canPos = canvas.getBoundingClientRect();
+      let width = e.clientX - this.state.startX - canPos.left;
+      let height = e.clientY - this.state.startY - canPos.top;
       ctx.save();
-      ctx.rect(this.state.last_mouseX, this.state.last_mouseY, width, height);
+      ctx.rect(this.state.startX, this.state.startY, width, height);
       ctx.strokeStyle = 'rgb(0,153,255)';
       ctx.lineWidth = 3;
       ctx.setLineDash([10, 15]);
       ctx.stroke();
       ctx.restore();
+      this.setState({
+        endX: e.clientX - canPos.left,
+        endY: e.clientY - canPos.top
+      });
     }
   }
 
