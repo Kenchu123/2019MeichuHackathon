@@ -1,16 +1,17 @@
 // for rendering pdf
 import React from 'react'
+import MouseDraw from './MouseDraw'
 
 class PDFViewer extends React.Component {
     constructor(props) {
         super(props)
         this.pageRef = React.createRef()
-        this.textRef = React.createRef()
         this.state = {
-            pageNum: 1
+            pageNum: 1,
         }
         this.setPage = this.setPage.bind(this)
         this.renderPDF = this.renderPDF.bind(this)
+        this.rect = new MouseDraw
     }
     setPage(n) {
         let { pdf } = this.props
@@ -25,14 +26,13 @@ class PDFViewer extends React.Component {
         let { pdf } = this.props
         let { pageNum } = this.state
         pdf.getPage(pageNum).then(page => {
-            let scale = 1.5
+            let scale = 1.2
             let viewport = page.getViewport({scale: scale})
             let canvas = this.pageRef.current
             canvas.height = viewport.height
             canvas.width = viewport.width
             let context = canvas.getContext('2d')
-            // context.clearRect(0, 0, canvas.width, canvas.height);
-
+            // context.clearRect(0, 0, canvas.width, canvas.height)
 
             // Render PDF page into canvas context
             let renderContext = {
@@ -54,7 +54,11 @@ class PDFViewer extends React.Component {
                 <br />
                 <div id='viewer' className='container'>
                     <div id={`page-${this.state.pageNum}`} style={{position: 'relatvie'}}>
-                        <canvas ref={this.pageRef} />
+                        <canvas ref={this.pageRef}
+                            onMouseDown={(e) => this.rect.mouseDown(e, this.pageRef.current)}
+                            onMouseUp={(e) => this.rect.mouseUp(e, this.pageRef.current)}
+                            onMouseMove={(e) => this.rect.mouseMove(e, this.pageRef.current)}
+                        />
                     </div>
                 </div>
             </div>
