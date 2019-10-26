@@ -75,7 +75,7 @@ def split_objs(textboxes):
         arr = text.split()  # split by whitespace
         width = x1 - x0
         height = y1 - y0
-        # TODO
+        # TODO This is different from split_objs in parse_table, maybe this is wrong?
         if isinstance(textbox, LTTextBoxHorizontal):
             if sep == '\n':
                 approx_h = height / len(arr)
@@ -232,7 +232,7 @@ def plot_object(lst):
 
 
 if __name__ == '__main__':
-    # textboxes = get_text('../data/42-45S83200G-16160G.pdf',2, (0, 274, 612, 650))
+    # textboxes = get_text('../data/42-45S83200G-16160G.pdf', 2, (0, 274, 612, 650))
     # textboxes = get_text('../data/TLK2711.pdf', 2, (0, 90, 612, 422))
     textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
 
@@ -243,4 +243,3 @@ if __name__ == '__main__':
     merge_pins_mapped_to_same_number(result)
 
     pprint(result)
-    plot_object(result.values())
