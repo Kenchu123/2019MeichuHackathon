@@ -1,65 +1,101 @@
 // for rendering pdf
-import React from 'react'
-import pdfjsLib from 'pdfjs-dist'
-import PDFViewer from './PDFViewer'
+import React from 'react';
+import pdfjsLib from 'pdfjs-dist';
+import PDFViewer from './PDFViewer';
+import Button from '@material-ui/core/Button';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import Typography from '@material-ui/core/Typography';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 // The workerSrc property shall be specified.
-pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  '//mozilla.github.io/pdf.js/build/pdf.worker.js';
 
+const UPLOAD_STATUS = { PENDING: 0, LOADING: 1, FINISHED: 2, FAILED: 3 };
 class PDFManager extends React.Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            uploadStatus: '',
-        }
-        this.uploadPDF = this.uploadPDF.bind(this)
-        this.pdf = null
-    }
-    uploadPDF(e) {
-        e.preventDefault()
-        let file = e.target.files[0]
-        if (file.type !== "application/pdf") {
-            console.error(file.name, 'is not a pdf file.')
-            return
-        }
-        // open uploaded file
-        let fileReader = new FileReader()
-        fileReader.onload = (e) => {
-            this.setState({ uploadStatus: 'Loading...' })
-            
-            // load pdf with pdf js
-            let typedarray = new Uint8Array(e.target.result)
-            pdfjsLib.getDocument(typedarray).promise.then(pdf => {
-                // upload finish
-                this.pdf = pdf
-                this.setState({ uploadStatus: '' })
-            }, (err) => {
-                this.setState({ uploadStatus: 'Fail to upload!!'})
-                console.error(err)
-            })
-        }
-        fileReader.readAsArrayBuffer(file)
-    }
-    render() {
-        let pdfViewer
-        if (this.state.uploadStatus !== '') {
-            pdfViewer = <p>{this.state.uploadStatus}</p>
-        }
-        else if (this.pdf){
-            pdfViewer = <PDFViewer pdf={this.pdf} />
-        }
+  constructor(props) {
+    super(props);
+    this.state = {
+      uploadStatus: UPLOAD_STATUS.PENDING,
+      pdf: null
+    };
+    this.uploadPDF = this.uploadPDF.bind(this);
+  }
 
-        return (
-            <div>
-                <h3>Upload datasheet and try to get your microchip!</h3>
-                <p></p>
-                <input type='file' accept="application/pdf" onChange={e => this.uploadPDF(e)}></input>
-                <br />
-                {pdfViewer}
-            </div>
-        )
+  uploadPDF(e) {
+    e.preventDefault();
+    let file = e.target.files[0];
+    if (file.type !== 'application/pdf') {
+      console.error(file.name, 'is not a pdf file.');
+      return;
     }
-    
+    // open uploaded file
+    let fileReader = new FileReader();
+    fileReader.onload = e => {
+      this.setState({ uploadStatus: UPLOAD_STATUS.LOADING });
+
+      // load pdf with pdf js
+      let typedarray = new Uint8Array(e.target.result);
+      pdfjsLib
+        .getDocument(typedarray)
+        .promise.then(pdf => {
+          // upload finish
+          this.setState({ uploadStatus: UPLOAD_STATUS.FINISHED, pdf });
+        })
+        .catch(err => {
+          this.setState({ uploadStatus: UPLOAD_STATUS.FAILED });
+          console.error(err);
+        });
+    };
+    fileReader.readAsArrayBuffer(file);
+  }
+
+  render() {
+    let pdfViewer;
+    if (this.state.uploadStatus === UPLOAD_STATUS.FINISHED) {
+      pdfViewer = <PDFViewer pdf={this.state.pdf} />;
+    }
+
+    return (
+      <div>
+        <Typography variant="h2">Upload File</Typography>
+        <Typography
+          variant="h5"
+          style={{ paddingTop: '24px', paddingBottom: '12px' }}
+        >
+          Upload datasheet and select the desired area to parse
+        </Typography>
+        <Button
+          variant="contained"
+          color="default"
+          startIcon={<CloudUploadIcon />}
+          component="label"
+        >
+          <input
+            id="file-upload"
+            type="file"
+            accept="application/pdf"
+            onChange={this.uploadPDF}
+            style={{ display: 'none' }}
+          />
+          {this.state.uploadStatus === UPLOAD_STATUS.LOADING ? (
+            <div
+              style={{
+                width: '61px',
+                display: 'flex',
+                justifyContent: 'center'
+              }}
+            >
+              <CircularProgress color="primary" size={24} />
+            </div>
+          ) : (
+            'Upload'
+          )}
+        </Button>
+        {pdfViewer}
+      </div>
+    );
+  }
 }
 
-export default PDFManager
+export default PDFManager;

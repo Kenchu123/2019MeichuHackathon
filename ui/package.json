@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@material-ui/core": "^4.5.1",
+    "@material-ui/icons": "^4.5.1",
     "express": "^4.17.1",
     "pdfjs": "^2.3.2",
     "pdfjs-dist": "^2.2.228",

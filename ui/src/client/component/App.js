@@ -1,12 +1,13 @@
-import React from 'react'
-import Title from './Title'
-import PDFManager from './PDFManager'
+import React from 'react';
+import PDFManager from './PDFManager';
+import ResponsiveDrawer from './ResponsiveDrawer';
 
 const App = () => (
-    <div className='App'>
-        <Title />
-        <PDFManager />
-    </div>
-)
+  <div className="App">
+    <ResponsiveDrawer>
+      <PDFManager />
+    </ResponsiveDrawer>
+  </div>
+);
 
-export default App
+export default App;
