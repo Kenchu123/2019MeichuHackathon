@@ -1,7 +1,6 @@
 // for rendering pdf
 import React from 'react';
 import pdfjsLib from 'pdfjs-dist';
-import PDFViewer from './PDFViewer';
 import Button from '@material-ui/core/Button';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Typography from '@material-ui/core/Typography';
@@ -22,13 +21,13 @@ class PDFManager extends React.Component {
       uploadStatus: UPLOAD_STATUS.PENDING,
       pdf: null,
       data: {
-          pageNum: 0,
-          startX: 0,
-          startY: 0,
-          endX: 0,
-          endY: 0,
-          width: 0,
-          height: 0,
+        pageNum: 0,
+        startX: 0,
+        startY: 0,
+        endX: 0,
+        endY: 0,
+        width: 0,
+        height: 0
       },
       imgUrl: ''
     };
@@ -65,7 +64,9 @@ class PDFManager extends React.Component {
         .getDocument(typedarray)
         .promise.then(pdf => {
           // upload finish
-          this.setState({ uploadStatus: UPLOAD_STATUS.FINISHED, pdf });
+          this.props.updatePdf(pdf);
+          this.props.nextPage();
+          // this.setState({ uploadStatus: UPLOAD_STATUS.FINISHED, pdf });
         })
         .catch(err => {
           this.setState({ uploadStatus: UPLOAD_STATUS.FAILED });
@@ -75,30 +76,23 @@ class PDFManager extends React.Component {
     fileReader.readAsArrayBuffer(file);
 
     // pass to server
-    let formData = new FormData()
-    formData.append('pdf', file)
+    let formData = new FormData();
+    formData.append('pdf', file);
     fetch('/api/download', {
-        method: 'POST',
-        body: formData,
-    })
-    .then(res => {
-        console.log(res.json)
-    })
+      method: 'POST',
+      body: formData
+    }).then(res => {
+      console.log(res.json);
+    });
   }
 
   render() {
-    let pdfViewer;
-    if (this.state.uploadStatus === UPLOAD_STATUS.FINISHED) {
-      pdfViewer = <PDFViewer pdf={this.state.pdf} getData={this.getData}/>;
-    }
-
     return (
       <div>
-        <Typography variant="h2">Upload File</Typography>
-        <Typography
-          variant="h5"
-          style={{ paddingTop: '24px', paddingBottom: '12px' }}
-        >
+        <Typography gutterBottom variant="h2">
+          Upload File
+        </Typography>
+        <Typography paragraph variant="h5">
           Upload datasheet and select the desired area to parse
         </Typography>
         <Button
@@ -106,6 +100,7 @@ class PDFManager extends React.Component {
           color="default"
           startIcon={<CloudUploadIcon />}
           component="label"
+          style={{ margin: '8px' }}
         >
           <input
             id="file-upload"
@@ -128,10 +123,6 @@ class PDFManager extends React.Component {
             'Upload'
           )}
         </Button>
-        <ParseButton type='diagram' data={this.state.data} getImg={this.getImg} />
-        <ParseButton type='table' data={this.state.data} getImg={this.getImg} />
-        {pdfViewer}
-        <Img url={this.state.imgUrl} />
       </div>
     );
   }

@@ -67,7 +67,7 @@ class TextObject:
         return (self.bbox[1] + self.bbox[3]) / 2
 
     def to_json(self):
-        return {"text": self.text, "bbox": self.bbox}
+        return {"text": self.text, "bbox": self.bbox, "isVertical": self.is_vertical}
 
 
 def split_objs(textboxes):
@@ -110,10 +110,9 @@ def split_objs(textboxes):
             else:
                 approx_w = width / len(arr)
                 # evenly divide in horizontal direction
-                # pprint(arr)
                 for index, txt in enumerate(arr):
                     ret.append(TextObject(
-                        txt, (x0+index*approx_w, y0, x0+(index+1)*approx_w, y1), is_vertical=False))
+                        txt, (x1-(index+1)*approx_w, y0, x1-index*approx_w, y1), is_vertical=False))
 
     return ret
 
@@ -260,8 +259,8 @@ def tmp_parse(textboxes):
 
 if __name__ == '__main__':
     # textboxes = get_text('../data/42-45S83200G-16160G.pdf', 2, (0, 274, 612, 650))
-    # textboxes = get_text('../data/TLK2711.pdf', 2, (0, 90, 612, 422))
-    textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
+    textboxes = get_text('../data/TLK2711.pdf', 2, (0, 90, 612, 422))
+    # textboxes = get_text('../data/ds093.pdf', 16, (0, 329, 612, 740))
 
     merge_overlapped(textboxes)
     textboxes = split_objs(textboxes)

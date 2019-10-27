@@ -2,8 +2,12 @@
 import React from 'react';
 import MouseDraw from './MouseDraw';
 import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import Typography from '@material-ui/core/Typography';
+import ParseButton from './ParseButton';
+import Img from './Img';
 
 class PDFViewer extends React.Component {
   constructor(props) {
@@ -14,28 +18,28 @@ class PDFViewer extends React.Component {
       width: 0,
       height: 0,
       mouseXY: {
-          startX: 0,
-          startY: 0,
-          endX: 0,
-          endY: 0
-      }
+        startX: 0,
+        startY: 0,
+        endX: 0,
+        endY: 0
+      },
+      imgUrl: ''
     };
     this.setPage = this.setPage.bind(this);
     this.renderPDF = this.renderPDF.bind(this);
     this.rect = new MouseDraw();
 
     this.getMouseXY = this.getMouseXY.bind(this);
+    this.getImg = this.getImg.bind(this);
+  }
+
+  // to get Img url from parseButton
+  getImg(imgUrl) {
+    this.setState({ imgUrl: imgUrl });
   }
 
   getMouseXY(mouseXY) {
-      this.setState({mouseXY: mouseXY}, () => {
-          this.props.getData({
-              pageNum: this.state.pageNum,
-              width: this.state.width,
-              height: this.state.height,
-              ...mouseXY,
-          })
-    })
+    this.setState({ mouseXY });
   }
 
   setPage(n) {
@@ -76,8 +80,22 @@ class PDFViewer extends React.Component {
   }
 
   render() {
+    const data = {
+      pageNum: this.state.pageNum,
+      width: this.state.width,
+      height: this.state.height,
+      ...this.state.mouseXY
+    };
     return (
-      <div id="viewer" style={{ paddingTop: '24px' }}>
+      <div id="viewer">
+        <Typography gutterBottom variant="h2">
+          Select Area
+        </Typography>
+        <Typography paragraph variant="h5">
+          Click and drag to select a desired area
+        </Typography>
+        <ParseButton type="diagram" data={data} getImg={this.getImg} />
+        <ParseButton type="table" data={data} getImg={this.getImg} />
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <IconButton onClick={() => this.setPage(-1)}>
             <ChevronLeftIcon />
@@ -90,9 +108,14 @@ class PDFViewer extends React.Component {
         <div id="viewer" className="container">
           <div style={{ position: 'relative' }}>
             <canvas ref={this.pageRef} />
-            <MouseDraw width={this.state.width} height={this.state.height} getMouseXY={this.getMouseXY} />
+            <MouseDraw
+              width={this.state.width}
+              height={this.state.height}
+              getMouseXY={this.getMouseXY}
+            />
           </div>
         </div>
+        <Img url={this.state.imgUrl} />
       </div>
     );
   }

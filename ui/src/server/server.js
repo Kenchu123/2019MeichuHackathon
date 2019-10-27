@@ -2,13 +2,13 @@ const express = require('express');
 const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackConfig = require('../../webpack.dev.js');
-const path = require('path')
+const path = require('path');
 
-const spawn = require('child_process').spawn
-const multer = require('multer')
-const upload = multer({ dest: '../../uploads/'})
+const spawn = require('child_process').spawn;
+const multer = require('multer');
+const upload = multer({ dest: '../../uploads/' });
 
-const fs = require('fs')
+const fs = require('fs');
 
 // Setup an Express server
 const app = express();
@@ -41,15 +41,15 @@ let pdfData = {
   pageNum: 0,
   width: 0,
   height: 0
-}
+};
 // api
 // download pdf, store in ui/uploads
 app.post('/api/download', upload.single('pdf'), (req, res, next) => {
-  let file = req.file
+  let file = req.file;
   if (!file) {
-    const err = new Error('Please upload a file')
-    err.httpStatusCode = 400
-    return next(err)
+    const err = new Error('Please upload a file');
+    err.httpStatusCode = 400;
+    return next(err);
   }
   fs.readFile(file.path, (err, data) => {
     fs.writeFile(`../uploads/${file.originalname}`, data, (err) => {
