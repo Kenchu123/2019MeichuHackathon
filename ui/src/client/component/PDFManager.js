@@ -76,6 +76,7 @@ class PDFManager extends React.Component {
           color="default"
           startIcon={<CloudUploadIcon />}
           component="label"
+          style={{ margin: '8px' }}
         >
           <input
             id="file-upload"

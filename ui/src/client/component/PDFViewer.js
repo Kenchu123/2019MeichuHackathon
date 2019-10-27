@@ -71,8 +71,17 @@ class PDFViewer extends React.Component {
           variant="contained"
           color="default"
           endIcon={<ChevronRightIcon />}
+          style={{ margin: '8px' }}
         >
-          Next
+          Diagram
+        </Button>
+        <Button
+          variant="contained"
+          color="default"
+          endIcon={<ChevronRightIcon />}
+          style={{ margin: '8px' }}
+        >
+          Table
         </Button>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <IconButton onClick={() => this.setPage(-1)}>
