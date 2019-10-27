@@ -29,6 +29,8 @@ app.use(express.urlencoded());
 // Parse JSON bodies (as sent by API clients)
 app.use(express.json());
 
+const _w = 612, _h = 792
+
 let pdfData = {
   name: '',
   type: '',
@@ -59,13 +61,26 @@ app.post('/api/download', upload.single('pdf'), (req, res, next) => {
 })
 // for get user input 
 // get pdfData
+// name: '', type: '', startX startY endX endY pageNum width height
 app.post('/api/parsetype/diagram', (req, res) => {
   pdfData = Object.assign(pdfData, req.body)
   console.log(pdfData)
-  // run python
+  
+  // { name, type, startX, startY, endX, endY, pageNum, width, height } = pdfData
+  pdfData.startY = _h - pdfData.startY
+  pdfData.endY = _h - pdfData.endY
+  ratio = _w / pdfData.width
+  pdfData.startX = pdfData.startX * ratio
+  pdfData.startY = pdfData.startY * ratio
+  pdfData.endX = pdfData.endX * ratio
+  pdfData.endY = pdfData.endY * ratio
+  pa = path.resolve(`../uploads/${pdfData.name}.pdf`)
+  
+  // run parsing
   const pythonProcess = spawn('python3', ['../parser/test.py'])
   pythonProcess.stdout.on('data', data => console.log(data.toString()))
-  // run a lot of python
+  // run img capture
+  const pyImgCapture = spawn('python3', ['../parser/capture_pic.py', ])
   res.sendFile(path.resolve(`../parser/pictures/${pdfData.name}.png`))
 })
 
@@ -75,6 +90,7 @@ app.post('/api/parsetype/table', (req, res) => {
   // run python
   const pythonProcess = spawn('python3', ['../parser/test.py'])
   pythonProcess.stdout.on('data', data => console.log(data.toString()))
+
   // run a lot of python
   res.sendFile(path.resolve(`../parser/pictures/${pdfData.name}.png`))
 })
