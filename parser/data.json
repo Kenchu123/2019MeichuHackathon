@@ -1,0 +1,85 @@
+{
+    "ENABLE": {
+        "pin": [
+            "A5"
+        ],
+        "type": "I\u2020",
+        "description": "Device enable. When this terminal is held low, the device is placed in power-down mode. Only\nthe signal detect circuit on the serial receive pair is active.  When asserted high while the\ndevice is in power-down mode, the transceiver goes into power-on reset before beginning\nnormal operation."
+    },
+    "GND": {
+        "pin": [
+            "A1",
+            "J1",
+            "D3",
+            "E3",
+            "F3",
+            "G3",
+            "C4",
+            "D4",
+            "E4",
+            "F4",
+            "G4",
+            "A9",
+            "J9"
+        ],
+        "type": "",
+        "description": "Digital logic ground. Provides a ground for the logic circuits and digital I/O buffers."
+    },
+    "GNDA": {
+        "pin": [
+            "H4",
+            "H6"
+        ],
+        "type": "",
+        "description": "Analog ground. GNDA provides a ground reference for the high-speed analog circuits, RX and\nTX."
+    },
+    "LCKREFN": {
+        "pin": [
+            "B5"
+        ],
+        "type": "I\u2020",
+        "description": "Lock to reference.When LCKREFN is low, the receiver clock is frequency locked to TXCLK.\nThis places the device in a transmit only mode since the receiver is not tracking the data.\nWhen LCKREFN is asserted low, the receive data bus terminals, RXD[0:15], RXCLK and\nRKLSB, RKMSB are in a high-impedance state.\nWhen LCKREFN is deasserted high, the receiver is locked to the received data stream."
+    },
+    "LOOPEN": {
+        "pin": [
+            "B6"
+        ],
+        "type": "I\u2021",
+        "description": "Loop enable. When LOOPEN is active high, the internal loop-back path is activated. The\ntransmitted serial data is directly routed internally to the inputs of the receiver.  This provides\na self-test capability in conjunction with the protocol device. The TXP and TXN outputs are\nheld in a high-impedance state during the loop-back test. LOOPEN is held low during standard\noperational state with external serial outputs and inputs active."
+    },
+    "PRE": {
+        "pin": [
+            "J5"
+        ],
+        "type": "I\u2021",
+        "description": "Preemphasis control. Selects the amount of preemphasis to be added to the high speed serial\noutput drivers. Left low or unconnected, 5% preemphasis is added. Pulled high, 20%\npreemphasis is added."
+    },
+    "PRBSEN": {
+        "pin": [
+            "A4"
+        ],
+        "type": "I\u2021",
+        "description": "PRBS test enable. When asserted high results of pseudo random bit stream (PRBS) tests can\nbe monitored on the RKLSB terminal. A high on RKLSB indicates that valid PRBS is being\nreceived."
+    },
+    "RKLSB": {
+        "pin": [
+            "A3"
+        ],
+        "type": "O",
+        "description": "K-Code indicator/PRBS test results. When RKLSB is asserted high, an 8-bit/10-bit K code\nwas received and is indicated by data bits RXD0\u2013RXD7. When RKLSB is asserted low an\n8-bit/10-bit D code is received and is presented on data bits RXD0\u2013RXD7.\nWhen PRBSEN is asserted high this pin is used to indicate status of the PRBS test results\n(high = pass)."
+    },
+    "RKMSB": {
+        "pin": [
+            "B3"
+        ],
+        "type": "O",
+        "description": "K-code indicator. When RKMSB is asserted high an 8-bit/10-bit K code was received and is\nindicated by data bits RXD8 \u2013RXD15. When RKMSB is asserted low an 8-bit/10-bit D code\nwas received and is presented on data bits RXD8 \u2013 RXD15. If the differential signal on RXN\nand RXP drops below 200 mV, then RXD [0:15], RKLSB, and RKMSB are all asserted high."
+    },
+    "RXCLK": {
+        "pin": [
+            "E2"
+        ],
+        "type": "O",
+        "description": "Recovered clock. Output clock that is synchronized to RXD [0..9], RKLSB, and RKMSB.\nRXCLK is the recovered serial data rate clock divided by 20. RXCLK is held low during\npower-on reset."
+    }
+}
