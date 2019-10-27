@@ -35,6 +35,12 @@ class MouseDraw extends React.Component {
 
   mouseUp(e) {
     this.setState({ mouseIsDown: false });
+    this.props.getMouseXY({
+        startX: this.state.startX,
+        startY: this.state.startY,
+        endX: this.state.endX,
+        endY: this.state.endY,
+    })
   }
 
   mouseMove(e) {

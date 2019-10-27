@@ -7,6 +7,9 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Typography from '@material-ui/core/Typography';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
+import ParseButton from './ParseButton'
+import Img from './Img'
+
 // The workerSrc property shall be specified.
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   '//mozilla.github.io/pdf.js/build/pdf.worker.js';
@@ -17,9 +20,31 @@ class PDFManager extends React.Component {
     super(props);
     this.state = {
       uploadStatus: UPLOAD_STATUS.PENDING,
-      pdf: null
+      pdf: null,
+      data: {
+          pageNum: 0,
+          startX: 0,
+          startY: 0,
+          endX: 0,
+          endY: 0,
+          width: 0,
+          height: 0,
+      },
+      imgUrl: ''
     };
     this.uploadPDF = this.uploadPDF.bind(this);
+
+    this.getData = this.getData.bind(this); // data for server
+    this.getImg = this.getImg.bind(this); // Img from server
+  }
+  // to getData from PDFViewer to give ParseButton
+  getData(data) {
+      this.setState({data: data})
+  }
+
+  // to get Img url from parseButton
+  getImg(imgUrl) {
+      this.setState({imgUrl : imgUrl})
   }
 
   uploadPDF(e) {
@@ -64,7 +89,7 @@ class PDFManager extends React.Component {
   render() {
     let pdfViewer;
     if (this.state.uploadStatus === UPLOAD_STATUS.FINISHED) {
-      pdfViewer = <PDFViewer pdf={this.state.pdf} />;
+      pdfViewer = <PDFViewer pdf={this.state.pdf} getData={this.getData}/>;
     }
 
     return (
@@ -103,7 +128,10 @@ class PDFManager extends React.Component {
             'Upload'
           )}
         </Button>
+        <ParseButton type='diagram' data={this.state.data} getImg={this.getImg} />
+        <ParseButton type='table' data={this.state.data} getImg={this.getImg} />
         {pdfViewer}
+        <Img url={this.state.imgUrl} />
       </div>
     );
   }

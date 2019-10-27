@@ -12,11 +12,30 @@ class PDFViewer extends React.Component {
     this.state = {
       pageNum: 1,
       width: 0,
-      height: 0
+      height: 0,
+      mouseXY: {
+          startX: 0,
+          startY: 0,
+          endX: 0,
+          endY: 0
+      }
     };
     this.setPage = this.setPage.bind(this);
     this.renderPDF = this.renderPDF.bind(this);
     this.rect = new MouseDraw();
+
+    this.getMouseXY = this.getMouseXY.bind(this);
+  }
+
+  getMouseXY(mouseXY) {
+      this.setState({mouseXY: mouseXY}, () => {
+          this.props.getData({
+              pageNum: this.state.pageNum,
+              width: this.state.width,
+              height: this.state.height,
+              ...mouseXY,
+          })
+    })
   }
 
   setPage(n) {
@@ -71,7 +90,7 @@ class PDFViewer extends React.Component {
         <div id="viewer" className="container">
           <div style={{ position: 'relative' }}>
             <canvas ref={this.pageRef} />
-            <MouseDraw width={this.state.width} height={this.state.height} />
+            <MouseDraw width={this.state.width} height={this.state.height} getMouseXY={this.getMouseXY} />
           </div>
         </div>
       </div>
