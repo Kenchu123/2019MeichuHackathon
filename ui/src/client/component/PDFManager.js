@@ -16,7 +16,17 @@ class PDFManager extends React.Component {
     super(props);
     this.state = {
       uploadStatus: UPLOAD_STATUS.PENDING,
-      pdf: null
+      pdf: null,
+      data: {
+        pageNum: 0,
+        startX: 0,
+        startY: 0,
+        endX: 0,
+        endY: 0,
+        width: 0,
+        height: 0
+      },
+      imgUrl: ''
     };
     this.uploadPDF = this.uploadPDF.bind(this);
   }
@@ -62,7 +72,6 @@ class PDFManager extends React.Component {
   }
 
   render() {
-    let pdfViewer;
     return (
       <div>
         <Typography gutterBottom variant="h2">
