@@ -17,10 +17,10 @@ def ImageCapture(path, page, size, pos, out_path):
 if __name__ == '__main__':
     # name = 'ds093'
     # page = 17
-    width = 612
-    height = 792
+    width = 1224
+    height = 1584
     # x1, y1, x2, y2 = 0, 658, 1224, 1480 # left lower to right upper
-    name, page, x1, y1, x2, y2 = sys.argv[1], int(sys.argv[2]), float(sys.argv[3]), float(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6])
+    name, page, x1, y1, x2, y2 = sys.argv[1], int(sys.argv[2]), float(sys.argv[3])*2, float(sys.argv[4])*2, float(sys.argv[5])*2, float(sys.argv[6])*2
     print(sys.argv)
     # return Croped Img
     path = ''.join(('../uploads/', name, '.pdf'))
