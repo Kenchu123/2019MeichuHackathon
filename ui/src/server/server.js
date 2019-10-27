@@ -29,6 +29,8 @@ app.use(express.urlencoded());
 // Parse JSON bodies (as sent by API clients)
 app.use(express.json());
 
+const _w = 612, _h = 792
+
 let pdfData = {
   name: '',
   type: '',
@@ -62,21 +64,53 @@ app.post('/api/download', upload.single('pdf'), (req, res, next) => {
 app.post('/api/parsetype/diagram', (req, res) => {
   pdfData = Object.assign(pdfData, req.body)
   console.log(pdfData)
+
+  pdfData.startY = pdfData.height - pdfData.startY
+  pdfData.endY = pdfData.height - pdfData.endY
+  ratio = _w / pdfData.width
+  pdfData.startX *= ratio
+  pdfData.startY *= ratio
+  pdfData.endX *= ratio
+  pdfData.endY *= ratio
+
   // run python
   const pythonProcess = spawn('python3', ['../parser/test.py'])
   pythonProcess.stdout.on('data', data => console.log(data.toString()))
   // run a lot of python
-  res.sendFile(path.resolve(`../parser/pictures/${pdfData.name}.png`))
+  const pyImgCapture = spawn('python3', ['../parser/capture_pic.py', 
+    pdfData.name, pdfData.pageNum, pdfData.startX, pdfData.startY, pdfData.endX, pdfData.endY])
+  pyImgCapture.stdout.on('data', data => {
+    res.sendFile(path.resolve(`../pictures/${pdfData.name}.png`))
+  })
+  pyImgCapture.stderr.on('data', data => {
+    console.log(data.toString())
+  })
 })
 
 app.post('/api/parsetype/table', (req, res) => {
   pdfData = Object.assign(pdfData, req.body)
   console.log(pdfData)
+
+  pdfData.startY = pdfData.height - pdfData.startY
+  pdfData.endY = pdfData.height - pdfData.endY
+  ratioW = _w / pdfData.width
+  pdfData.startX *= ratio
+  pdfData.startY *= ratio
+  pdfData.endX *= ratio
+  pdfData.endY *= ratio
+
   // run python
   const pythonProcess = spawn('python3', ['../parser/test.py'])
   pythonProcess.stdout.on('data', data => console.log(data.toString()))
   // run a lot of python
-  res.sendFile(path.resolve(`../parser/pictures/${pdfData.name}.png`))
+  const pyImgCapture = spawn('python3', ['../parser/capture_pic.py', 
+    pdfData.name, pdfData.pageNum, pdfData.startX, pdfData.startY, pdfData.endX, pdfData.endY])
+  pyImgCapture.stdout.on('data', data => {
+    res.sendFile(path.resolve(`../pictures/${pdfData.name}.png`))
+  })
+  pyImgCapture.stderr.on('data', data => {
+    console.log(data.toString())
+  })
 })
 
 // Listen on port
